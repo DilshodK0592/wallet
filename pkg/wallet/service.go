@@ -93,6 +93,7 @@ func (s *Service) FindAccountByID(accountID int64) (*types.Account, error) {
 	var account *types.Account
 	for _, acc := range s.accounts {
 		if acc.ID == accountID {
+			account = acc
 			return account, nil
 		}
 	}
