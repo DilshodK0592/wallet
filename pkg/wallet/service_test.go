@@ -2,7 +2,7 @@ package wallet
 
 import "testing"
 
-func TestService_FindAccountByID_Found(t *testing.T) {
+func TestService_FindAccountByID_success(t *testing.T) {
 	
 	svc := Service{}
 	svc.RegisterAccount("+9920000001")
