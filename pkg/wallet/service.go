@@ -2,8 +2,9 @@ package wallet
 
 import (
 	"errors"
-	"github.com/google/uuid"
+
 	"github.com/DilshodK0592/wallet/pkg/types"
+	"github.com/google/uuid"
 )
 
 var (
@@ -102,37 +103,6 @@ func (s *Service) FindAccountByID(accountID int64) (*types.Account, error) {
 	return  nil, ErrAccountNotFound
 }
 
-
-func (s *Service)Reject(paymentID string) error {
-	var rejectPayment *types.Payment
-	for _, payment := range s.payments {
-		if payment.ID == paymentID {
-			rejectPayment = payment
-			break
-		}
-	}
-	if rejectPayment == nil {
-		return ErrPaymentNotFound
-	}
-
-	var rejectAccount *types.Account
-	for _, account := range s.accounts {
-		if account.ID == rejectPayment.AccountID {
-			rejectAccount = account
-			break
-		}
-	}
-	if rejectAccount == nil {
-		return ErrAccountNotFound
-	}
-
-	rejectPayment.Status = types.PaymentStatusFail
-	rejectAccount.Balance += rejectPayment.Amount
-	return nil
-
-}
-
-
 func (s *Service)FindPaymentByID(paymentID string) (*types.Payment, error) {
 	for _, payment := range s.payments {
 		if payment.ID == paymentID {
@@ -140,4 +110,38 @@ func (s *Service)FindPaymentByID(paymentID string) (*types.Payment, error) {
 		}
 	}
 	return nil, ErrPaymentNotFound
+}
+
+func (s *Service)Reject(paymentID string) error {
+	pay, err := s.FindPaymentByID(paymentID)
+	if err != nil {
+		return err
+	}
+
+	acc, err := s.FindAccountByID(pay.AccountID)
+	if err != nil {
+		return err
+	}
+
+	pay.Status = types.PaymentStatusFail
+	acc.Balance += pay.Amount
+
+	return nil
+
+}
+
+func (s *Service) Repeat(paymentID string) (*types.Payment, error) {
+	
+	pay, err := s.FindPaymentByID(paymentID)
+	if err != nil {
+		return nil, err
+	}
+
+	payment, err := s.Pay(pay.AccountID, pay.Amount, pay.Category)
+	if err != nil {
+		return nil, err
+	}
+
+	return payment, nil
+
 }
